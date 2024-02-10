@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mental Health Tracker</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+
+      #welcome {
+        text-align: center;
+        margin-top: 10vh;
+      }
+
+      h1 {
+        font-size: 8vh;
+      }
+
+      #feeling {
+        margin-top: 1vh;
+        width: 50%;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        
+      }
+
+      input[type="radio"] {
+        display: none;
+      }
+
+      label {
+        display: inline-block;
+        font-size: 9vh;
+        margin: 0.5vh;
+        cursor: pointer;
+      }
+
+      input[type="radio"]:checked + label {
+        background-color: #96a1e9;
+        border-radius: 50%;
+      }
+
+      #confirm-feeling{
+        margin-top: 5vh;
+        padding: 0.5vw 1vh;
+        font-size: 4vh;
+        background-color: #6868cf;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="welcome">
+        <h1>Hello! How are you feeling today</h1>
+        <!-- let user choose an emoji to represent how they feel -->
+        <div id="feeling">
+            <input type="radio" id="happy" name="feeling" value="happy">
+            <label for="happy">😊</label>
+            <input type="radio" id="sad" name="feeling" value="sad">
+            <label for="sad">😢</label>
+            <input type="radio" id="angry" name="feeling" value="angry">
+            <label for="angry">😡</label>
+            <input type="radio" id="anxious" name="feeling" value="anxious">
+            <label for="anxious">😨</label>
+            <input type="radio" id="tired" name="feeling" value="tired">
+            <label for="tired">😴</label>
+            <input type="radio" id="excited" name="feeling" value="excited">
+            <label for="excited">😄</label>
+            <input type="radio" id="stressed" name="feeling" value="stressed">
+            <label for="stressed">😖</label>
+            <input type="radio" id="calm" name="feeling" value="calm">
+            <label for="calm">😌</label>
+            <input type="radio" id="confused" name="feeling" value="confused">
+            <label for="confused">😕</label>
+            <input type="radio" id="frustrated" name="feeling" value="frustrated">
+            <label for="frustrated">😤</label>
+            <input type="radio" id="lonely" name="feeling" value="lonely">
+            <label for="lonely">😔</label>
+            <input type="radio" id="overwhelmed" name="feeling" value="overwhelmed">
+            <label for="overwhelmed">😰</label>
+            <input type="radio" id="hopeful" name="feeling" value="hopeful">
+            <label for="hopeful">😊</label>
+            <input type="radio" id="bored" name="feeling" value="bored">
+            <label for="bored">😐</label>
+            <input type="radio" id="grateful" name="feeling" value="grateful">
+            <label for="grateful">🙏</label>
+            <input type="radio" id="motivated" name="feeling" value="motivated">
+            <label for="motivated">😃</label>
+            <input type="radio" id="relieved" name="feeling" value="relieved">
+            <label for="relieved">😅</label>
+            <input type="radio" id="sick" name="feeling" value="sick">
+            <label for="sick">🤢</label>
+            <input type="radio" id="shocked" name="feeling" value="shocked">
+            <label for="shocked">😲</label>
+            <input type="radio" id="worried" name="feeling" value="worried">
+            <label for="worried">😟</label>
+        </div>
+        <button id="confirm-feeling">Confirm</button>
+    </div>
+  </body>
