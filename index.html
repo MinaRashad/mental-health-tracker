@@ -108,4 +108,44 @@
         </div>
         <button id="confirm-feeling">Confirm</button>
     </div>
+    <div>
+
+    </div>
+
+    <script>
+        /*
+        * First, User enters their feelings by selecting an emoji
+        * Then, enters 1 to 3 words to describe their feelings 
+        * Then, write why/what makes them feel that way, what is on their mind
+        * Finally, they submit it and it is stored in the local storage
+        * 
+        * The data will be stored in the local storage in the following format:
+        * {
+        *  date: '2021-01-01',
+        *  feeling: 'happy',
+        *  description: 'excited, hopeful, motivated',
+        *  reason: 'I got a new job'
+        * }
+        */
+
+        // get the confirm button
+        const confirmFeeling = document.getElementById('confirm-feeling');
+        // get all the radio buttons
+        const radioButtons = document.querySelectorAll('input[type="radio"]');
+        // get the emoji that the user selects
+        let feeling = '';
+
+        // add event listener to the confirm button
+        confirmFeeling.addEventListener('click', () => {
+            // loop through all the radio buttons
+            radioButtons.forEach(radio => {
+                // check if the radio button is checked
+                if (radio.checked) {
+                    // get next child
+                    feeling = radio.nextElementSibling.innerHTML;
+                }
+            });
+        });
+        
+    </script>
   </body>
