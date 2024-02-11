@@ -48,10 +48,10 @@
         border-radius: 50%;
       }
 
-      #confirm-feeling{
+      .nextbtn{
         margin-top: 5vh;
-        padding: 0.5vw 1vh;
-        font-size: 4vh;
+        padding: 0.5vh 1vw;
+        font-size: 5vw;
         background-color: #6868cf;
         color: white;
         border: none;
@@ -63,7 +63,7 @@
         background-color: #4f4f9f;
       }
 
-        #describe-feelings {
+        #describe-feelings, #describe-reason {
             display: none;
             text-align: center;
             margin-top: 18vh;
@@ -87,7 +87,7 @@
   <body>
     <div class="feeling"></div>
     <div id="welcome">
-        <h1>Hello! How are you feeling today</h1>
+        <h1>Hello! How are you feeling today?</h1>
         <!-- let user choose an emoji to represent how they feel -->
         <div id="feeling">
             <input type="radio" id="happy" name="feeling" value="happy">
@@ -131,15 +131,45 @@
             <input type="radio" id="worried" name="feeling" value="worried">
             <label for="worried">😟</label>
         </div>
-        <button id="confirm-feeling">Next</button>
+        <button id="confirm-feeling" class="nextbtn">Next</button>
+        <!-- to do skip to main menu -->
+        <button id="skip-feelings" class="nextbtn">Skip</button>
     </div>
 
     <div id="describe-feelings" style="display: none;">
         <h1>Describe your feelings in 1-3 words</h1>
-        <input type="text" id="description" placeholder="excited, hopeful, motivated...">
+        <input type="text" id="description" placeholder="I feel...">
+        <button id="confirm-description" class="nextbtn">Next</button>
+        <button id="cancel-description" class="nextbtn" onclick="location.reload();">Return</button>
     </div>
 
     <div id="describe-reason" style="display: none;">
+        <h1>What makes you feel that way?</h1>
+        <input type="text" id="reason" placeholder="because...">
+        <button id="confirm-reason" class="nextbtn">Save</button>
+        <button id="cancel-reason" class="nextbtn" onclick="location.reload();">Cancel</button>
+    </div>
+
+
+    <div id="main">
+        <!-- Here will be an AI advice, to do later -->
+        <div class="ai-advice">
+          <h1 id="advice">The secret of getting ahead is getting started.</h1>
+        </div>
+
+
+        <div id="controls">
+            <!-- if they want to add a new entry -->
+            <button id="new-entry" class="nextbtn">New Entry</button>
+            <!-- if they want to see previous entries -->
+            <button id="previous-entries" class="nextbtn">Previous Entries</button>
+        </div>
+
+        <div id="entries">
+          <h2>Previous Entries</h2>
+            <!-- Here will be the previous entries, to do later -->
+        </div>
+
 
     </div>
 
@@ -152,19 +182,25 @@
         * 
         * The data will be stored in the local storage in the following format:
         * {
-        *  date: '2021-01-01',
-        *  feeling: '😊',
+        *  date: 'yyyy-mm-dd',
+        *  time: 'enum: morning, afternoon, evening, night',
+        *  timestamp: 'yyyy-mm-ddThh:mm:ss',
+        *  feeling: 'emoji',
         *  description: 'excited, hopeful, motivated',
         *  reason: 'I got a new job'
         * }
         */
 
-        // get the confirm button
+        // Buttongs
         const confirmFeeling = document.getElementById('confirm-feeling');
+        const confirmDescription = document.getElementById('confirm-description');
         // get all the radio buttons
         const radioButtons = document.querySelectorAll('input[type="radio"]');
         // get the emoji that the user selects
         let feeling = '';
+        let description = '';
+        let reason = '';
+
 
         // local storage
         const storage = window.localStorage;
@@ -201,5 +237,22 @@
                 }
         });
         
+        // get the confirm button for the description
+        confirmDescription.addEventListener('click', () => {
+            // get the description
+            description = document.getElementById('description').value;
+            // if the user has not entered a description, alert them
+            if (!description) {
+                alert('Please enter a description for your feelings');
+                return;
+            }else{
+                // hide the describe feelings div
+                document.getElementById('describe-feelings').style.display = 'none';
+                // show the describe reason div
+                document.getElementById('describe-reason').style.display = 'block';
+            }
+
+        });
+
     </script>
   </body>
