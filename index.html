@@ -320,47 +320,12 @@
             // show the main div
             document.getElementById('main').style.display = 'block';
 
-
             // display previous entries
-            previousEntries.innerHTML = '';
-            reversedLog = log.reverse();
-            for (let entry of reversedLog){
-                const div = document.createElement('div');
-                div.className = 'entry';
-                
-                // emoji
-                const entryhead = document.createElement('span');
-                entryhead.style.fontSize = '7vh';
-                entryhead.appendChild(document.createTextNode(entry.feeling));
+            view_log();
 
-                div.appendChild(entryhead);
-                div.appendChild(document.createElement('br'));
+            // get advice
+            get_advice(feeling, description, reason);
 
-                // time
-                const entrytime = document.createElement('span');
-                entrytime.style.fontSize = '5vh';
-                entrytime.style.color = 'grey';
-                entrytime.style.fontWeight = 'Bold';
-                entrytime.appendChild(document.createTextNode(`${entry.timestamp.split('T')[0]}`));
-                entrytime.appendChild(document.createElement('br'));
-                entrytime.appendChild(document.createTextNode(`on a ${entry.day}'s ${entry.time}`));
-
-                
-                div.appendChild(entrytime);
-                div.appendChild(document.createElement('br'));
-
-                // description
-                const entrydesc = document.createElement('span');
-                entrydesc.style.fontSize = '5vh';
-                entrydesc.style.fontWeight = 'unset';
-
-                entrydesc.appendChild(document.createTextNode(`I feel... ${entry.description}`));
-                entrydesc.appendChild(document.createElement('br'));
-                entrydesc.appendChild(document.createTextNode(`because... ${entry.reason}`));
-
-                div.appendChild(entrydesc);
-                previousEntries.appendChild(div);
-            }
 
         }
 
@@ -416,5 +381,75 @@
             // save the log to the local storage
             storage.setItem('log', JSON.stringify(log));
         }
+    
+        function view_log(){
+                        // display previous entries
+                        previousEntries.innerHTML = '';
+            reversedLog = log.reverse();
+            for (let entry of reversedLog){
+                const div = document.createElement('div');
+                div.className = 'entry';
+                
+                // emoji
+                const entryhead = document.createElement('span');
+                entryhead.style.fontSize = '7vh';
+                entryhead.appendChild(document.createTextNode(entry.feeling));
+
+                div.appendChild(entryhead);
+                div.appendChild(document.createElement('br'));
+
+                // time
+                const entrytime = document.createElement('span');
+                entrytime.style.fontSize = '5vh';
+                entrytime.style.color = 'grey';
+                entrytime.style.fontWeight = 'Bold';
+                entrytime.appendChild(document.createTextNode(`${entry.timestamp.split('T')[0]}`));
+                entrytime.appendChild(document.createElement('br'));
+                entrytime.appendChild(document.createTextNode(`on a ${entry.day}'s ${entry.time}`));
+
+                
+                div.appendChild(entrytime);
+                div.appendChild(document.createElement('br'));
+
+                // description
+                const entrydesc = document.createElement('span');
+                entrydesc.style.fontSize = '5vh';
+                entrydesc.style.fontWeight = 'unset';
+
+                entrydesc.appendChild(document.createTextNode(`I feel... ${entry.description}`));
+                entrydesc.appendChild(document.createElement('br'));
+                entrydesc.appendChild(document.createTextNode(`because... ${entry.reason}`));
+
+                div.appendChild(entrydesc);
+                previousEntries.appendChild(div);
+            }
+
+        }
+
+
+        function get_advice(feeling, description, reason){
+            const base_url = 'http://localhost:8080/?prompt=';
+
+            const prompt = `
+            You are my personal therapist. You give me advice, motivation and support everyday.
+            Please give me some advice to deal with my feelings today, but make them clear and percise so I can take action today.
+            write a list of specific advice.
+
+            Here is how I feel today:
+            ${feeling}
+            ${description}
+            Because${reason}
+
+            What should I do?
+            `;
+
+            const url = base_url + prompt;
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            });
+        }
+    
     </script>
   </body>
