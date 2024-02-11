@@ -82,6 +82,37 @@
             margin: 1vw 1vh;
         }
 
+        #advice {
+            font-size: 8vh;
+            text-align: center;
+            margin-top: 10vh;
+        }
+
+        #controls {
+            text-align: center;
+            margin-top: 5vh;
+        }
+
+        #controls button {
+            text-align: center;
+            margin-top: 5vh;
+            font-size: 4vh;
+            display: inline-block;
+            margin: 0 auto;
+            padding: 0.5vh 1vw;
+            background-color: #6868cf;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+
+
+        }
+
+        #main{
+            text-align: center;
+        }
+
     </style>
   </head>
   <body>
@@ -133,7 +164,7 @@
         </div>
         <button id="confirm-feeling" class="nextbtn">Next</button>
         <!-- to do skip to main menu -->
-        <button id="skip-feelings" class="nextbtn">Skip</button>
+        <button class="nextbtn" onclick="go_to_main()">Skip</button>
     </div>
 
     <div id="describe-feelings" style="display: none;">
@@ -151,27 +182,26 @@
     </div>
 
 
-    <div id="main">
+    <div id="main" style="display: none;">
         <!-- Here will be an AI advice, to do later -->
         <div class="ai-advice">
-          <h1 id="advice">The secret of getting ahead is getting started.</h1>
+          <h1 id="advice">Creating advice for you...</h1>
         </div>
 
 
         <div id="controls">
             <!-- if they want to add a new entry -->
-            <button id="new-entry" class="nextbtn">New Entry</button>
-            <!-- if they want to see previous entries -->
-            <button id="previous-entries" class="nextbtn">Previous Entries</button>
+            <button id="new-entry" onclick="go_to_start()">New Entry</button>
         </div>
 
-        <div id="entries">
-          <h2>Previous Entries</h2>
-            <!-- Here will be the previous entries, to do later -->
-        </div>
-
-
+        <div id="previous-entries">
+            <h1>Previous Entries</h1>
+            <ul id="entries">
+                <!-- to do: display previous entries -->
+            </ul>
     </div>
+
+
 
     <script>
         /*
@@ -183,7 +213,8 @@
         * The data will be stored in the local storage in the following format:
         * {
         *  date: 'yyyy-mm-dd',
-        *  time: 'enum: morning, afternoon, evening, night',
+        *  time: 'enum: morning, afternoon, evening',
+        *  day: 'enum: monday, tuesday, wednesday, thursday, friday, saturday, sunday',
         *  timestamp: 'yyyy-mm-ddThh:mm:ss',
         *  feeling: 'emoji',
         *  description: 'excited, hopeful, motivated',
@@ -194,6 +225,9 @@
         // Buttongs
         const confirmFeeling = document.getElementById('confirm-feeling');
         const confirmDescription = document.getElementById('confirm-description');
+        const confirmReason = document.getElementById('confirm-reason');
+        const previousEntries = document.getElementById('previous-entries');
+
         // get all the radio buttons
         const radioButtons = document.querySelectorAll('input[type="radio"]');
         // get the emoji that the user selects
@@ -207,6 +241,12 @@
 
         // load the data from the local storage
         const log = JSON.parse(storage.getItem('log')) || [];
+
+        console.log(log);
+        // if the last log is recent, go to main
+        if(recent_entry()){
+            go_to_main();
+        }
 
         // add event listener to the confirm button
         confirmFeeling.addEventListener('click', () => {
@@ -254,5 +294,127 @@
 
         });
 
+        // get the confirm button for the reason
+        // we should save the data to the local storage
+        confirmReason.addEventListener('click',()=>{
+            // get the reason
+            reason = document.getElementById('reason').value;
+            // if the user has not entered a reason, alert them
+            if (!reason) {
+                alert('Please enter a reason for your feelings');
+                return;
+            }else{
+                save_log(feeling, description, reason);
+                go_to_main();
+
+            }
+        });
+
+
+        
+        function go_to_main(){
+            // hide all divs
+            for (let div of document.body.children){
+                div.style.display = 'none';
+            }
+            // show the main div
+            document.getElementById('main').style.display = 'block';
+
+
+            // display previous entries
+            previousEntries.innerHTML = '';
+            reversedLog = log.reverse();
+            for (let entry of reversedLog){
+                const div = document.createElement('div');
+                div.className = 'entry';
+                
+                // emoji
+                const entryhead = document.createElement('span');
+                entryhead.style.fontSize = '7vh';
+                entryhead.appendChild(document.createTextNode(entry.feeling));
+
+                div.appendChild(entryhead);
+                div.appendChild(document.createElement('br'));
+
+                // time
+                const entrytime = document.createElement('span');
+                entrytime.style.fontSize = '5vh';
+                entrytime.style.color = 'grey';
+                entrytime.style.fontWeight = 'Bold';
+                entrytime.appendChild(document.createTextNode(`${entry.timestamp.split('T')[0]}`));
+                entrytime.appendChild(document.createElement('br'));
+                entrytime.appendChild(document.createTextNode(`on a ${entry.day}'s ${entry.time}`));
+
+                
+                div.appendChild(entrytime);
+                div.appendChild(document.createElement('br'));
+
+                // description
+                const entrydesc = document.createElement('span');
+                entrydesc.style.fontSize = '5vh';
+                entrydesc.style.fontWeight = 'unset';
+
+                entrydesc.appendChild(document.createTextNode(`I feel... ${entry.description}`));
+                entrydesc.appendChild(document.createElement('br'));
+                entrydesc.appendChild(document.createTextNode(`because... ${entry.reason}`));
+
+                div.appendChild(entrydesc);
+                previousEntries.appendChild(div);
+            }
+
+        }
+
+        function go_to_start(){
+            // hide all divs
+            for (let div of document.body.children){
+                div.style.display = 'none';
+            }
+            // show the welcome div
+            document.getElementById('welcome').style.display = 'block';
+        }
+
+        function recent_entry(){
+          if (log.length > 0) {
+            const lastLog = log[log.length - 1];
+            const currentDate = new Date();
+            
+            // time of day of last log and current time
+            lastLogTime = lastLog.time
+            currentTime = currentDate.getHours() < 12 ? 'morning' : currentDate.getHours() < 18 ? 'afternoon' : 'evening';
+
+            // if the last log was today, go to main
+            if (lastLog.date === currentDate.toISOString().split('T')[0] && lastLogTime === currentTime) {
+                return true;
+            } else {
+                return false;
+            }
+          } else {
+            return false;
+          }
+        }
+    
+        function save_log(feeling, description, reason){
+            // get the current date and time
+            const date = new Date();
+            const timestamp = date.toISOString();            
+            const time = date.getHours() < 12 ? 'morning' : date.getHours() < 18 ? 'afternoon' : 'evening';
+            const day_id = date.getDay();
+            const day = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][day_id];
+
+            // create a log entry
+            const logEntry = {
+                date: date.toISOString().split('T')[0],
+                time: time,
+                day: day,
+                timestamp: timestamp,
+                feeling: feeling,
+                description: description,
+                reason: reason
+            };
+            // add the log entry to the log
+            log.push(logEntry);
+            // save the log to the local storage
+            storage.setItem('log', JSON.stringify(log));
+        }
     </script>
   </body>
