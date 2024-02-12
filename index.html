@@ -145,8 +145,6 @@
             <label for="lonely">😔</label>
             <input type="radio" id="overwhelmed" name="feeling" value="overwhelmed">
             <label for="overwhelmed">😰</label>
-            <input type="radio" id="hopeful" name="feeling" value="hopeful">
-            <label for="hopeful">😊</label>
             <input type="radio" id="bored" name="feeling" value="bored">
             <label for="bored">😐</label>
             <input type="radio" id="grateful" name="feeling" value="grateful">
@@ -185,13 +183,19 @@
     <div id="main" style="display: none;">
         <!-- Here will be an AI advice, to do later -->
         <div class="ai-advice">
-          <h1 id="advice">Creating advice for you...</h1>
+          <h1 id="advice">How are you feeling?</h1>
         </div>
 
 
         <div id="controls">
             <!-- if they want to add a new entry -->
             <button id="new-entry" onclick="go_to_start()">New Entry</button>
+            <!-- Get AI advice -->
+            <button id="get-advice">deal with that feeling</button>
+            <!-- if they want to reset the log -->
+            <button style="background-color: #9f4f4f;" onclick="popup(title='Are you sure?', message='This action can not be reverted.', confirm_callback=()=>{
+                storage.setItem('log', []); location.reload()} 
+                )">Reset</button>
         </div>
 
         <div id="previous-entries">
@@ -240,7 +244,12 @@
         const storage = window.localStorage;
 
         // load the data from the local storage
-        const log = JSON.parse(storage.getItem('log')) || [];
+        let log;
+        if(storage.getItem('log')){
+            log = JSON.parse(storage.getItem('log'));
+        }else{
+            log = [];
+        }
 
         console.log(log);
         // if the last log is recent, go to main
@@ -310,7 +319,10 @@
             }
         });
 
-
+        // get the get advice button
+        document.getElementById('get-advice').addEventListener('click', () => {
+            popup(title='Warning', message="This AI is highly unpredictable and untested. \nIt could be hazardous to your mental health if you are in a vulnerable state. Are you sure you want to proceed?", confirm_callback=()=>{get_advice(feeling, description, reason)} );
+        });
         
         function go_to_main(){
             // hide all divs
@@ -322,9 +334,6 @@
 
             // display previous entries
             view_log();
-
-            // get advice
-            get_advice(feeling, description, reason);
 
 
         }
@@ -342,7 +351,9 @@
           if (log.length > 0) {
             const lastLog = log[log.length - 1];
             const currentDate = new Date();
-            
+            feeling = lastLog.feeling;
+            description = lastLog.description;
+            reason = lastLog.reason;
             // time of day of last log and current time
             lastLogTime = lastLog.time
             currentTime = currentDate.getHours() < 12 ? 'morning' : currentDate.getHours() < 18 ? 'afternoon' : 'evening';
@@ -358,6 +369,15 @@
           }
         }
     
+        /*
+        @function save_log
+        @description save the log to the local storage
+
+        @param {string} feeling - the emoji that represents how the user feels
+        @param {string} description - 1-3 words that describe how the user feels
+        @param {string} reason - what makes the user feel that way
+        @returns {none}
+        */
         function save_log(feeling, description, reason){
             // get the current date and time
             const date = new Date();
@@ -382,6 +402,14 @@
             storage.setItem('log', JSON.stringify(log));
         }
     
+
+        /*
+        @function view_log
+        @description display previous entries
+
+        @param {none}
+        @returns {none}
+        */
         function view_log(){
                         // display previous entries
                         previousEntries.innerHTML = '';
@@ -426,30 +454,111 @@
 
         }
 
-
+        /*
+        @function get_advice
+        @description get advice from the AI
+        
+        @param {string} feeling - the emoji that represents how the user feels
+        @param {string} description - 1-3 words that describe how the user feels
+        @param {string} reason - what makes the user feel that way
+        @returns {none}
+        */
         function get_advice(feeling, description, reason){
+            document.getElementById('advice').innerHTML = "Generating advice...";
             const base_url = 'http://localhost:8080/?prompt=';
 
             const prompt = `
-            You are my personal therapist. You give me advice, motivation and support everyday.
-            Please give me some advice to deal with my feelings today, but make them clear and percise so I can take action today.
-            write a list of specific advice.
-
-            Here is how I feel today:
-            ${feeling}
-            ${description}
-            Because${reason}
-
-            What should I do?
+            You are a friend. You give advice, motivation and support everyday to your friend.
+            make sure your advice clear and percise so they can take action.
+            Also make your advice positive and encouraging, specific and actionable. 
+            You: Hello, how are you feeling
+            Friend: I am feeling ${description} because ${reason}.
+            You: I understand, you should 
             `;
 
+            console.log(prompt);
+
             const url = base_url + prompt;
+            
+            // the url returns plain text
             fetch(url)
-            .then(response => response.json())
+            .then(response => response.text())
             .then(data => {
-                console.log(data);
+                document.getElementById('advice').innerHTML = data;
             });
         }
     
+
+        function popup(title="Warning", message="Are you sure?", confirm_callback=()=>{alert('confirmed')}){
+            
+            // first create the popup
+            const popup = document.createElement('div');
+            popup.id = 'popup';
+            popup.style.position = 'fixed';
+            popup.style.top = '0';
+            popup.style.left = '0';
+            popup.style.width = '100%';
+            popup.style.height = '100%';
+            popup.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            popup.style.display = 'flex';
+            popup.style.justifyContent = 'center';
+            popup.style.alignItems = 'center';
+
+            // create the content
+            const content = document.createElement('div');
+            content.style.backgroundColor = 'white';
+            content.style.padding = '2vh';
+            content.style.borderRadius = '5px';
+            content.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+            content.style.textAlign = 'center';
+
+            // create the title
+            const h1 = document.createElement('h2');
+            h1.appendChild(document.createTextNode(title));
+            content.appendChild(h1);
+
+            // create the message
+            const p = document.createElement('p');
+            p.appendChild(document.createTextNode(message));
+            content.appendChild(p);
+
+            // create the buttons
+            const buttons = document.createElement('div');
+            buttons.style.display = 'flex';
+            buttons.style.justifyContent = 'center';
+            buttons.style.gap = '1vw';
+
+            const confirm = document.createElement('button');
+            confirm.appendChild(document.createTextNode('Yes'));
+            confirm.style.padding = '0.5vh 1vw';
+            confirm.style.backgroundColor = '#6868cf';
+            confirm.style.color = 'white';
+            confirm.style.border = 'none';
+            confirm.style.borderRadius = '5px';
+            confirm.style.cursor = 'pointer';
+            confirm.addEventListener('click', () => {
+                confirm_callback();
+                document.body.removeChild(popup);
+            });
+
+            const cancel = document.createElement('button');
+            cancel.appendChild(document.createTextNode('No'));
+            cancel.style.padding = '0.5vh 1vw';
+            cancel.style.backgroundColor = '#9f4f4f';
+            cancel.style.color = 'white';
+            cancel.style.border = 'none';
+            cancel.style.borderRadius = '5px';
+            cancel.style.cursor = 'pointer';
+            cancel.addEventListener('click', () => {
+                document.body.removeChild(popup);
+            });
+
+            buttons.appendChild(confirm);
+            buttons.appendChild(cancel);
+            content.appendChild(buttons);
+
+            popup.appendChild(content);
+            document.body.appendChild(popup);
+        }
     </script>
   </body>
