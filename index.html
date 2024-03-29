@@ -465,27 +465,71 @@
         */
         function get_advice(feeling, description, reason){
             document.getElementById('advice').innerHTML = "Generating advice...";
-            const base_url = 'http://localhost:8080/?prompt=';
-
-            const prompt = `
-            You are a friend. You give advice, motivation and support everyday to your friend.
-            make sure your advice clear and percise so they can take action.
-            Also make your advice positive and encouraging, specific and actionable. 
-            You: Hello, how are you feeling
-            Friend: I am feeling ${description} because ${reason}.
-            You: I understand, you should 
+            const ai_prompt = `
+            You are a friend who gives others advice regarding how they deal with their feelings.
+            Today your friend came to you and said they are feeling ${description} because ${reason}.
+            In their journal, they wrote that they are put this emoji to represent their feeling ${feeling}.
+            as a good friend, provide them with an easy to follow advice to deal with that feeling.
+            Make sure it is simple enough to not overwhelm them.
+            try to provide new perspective or a new way to look at the situation.
+            Write at most 10 words for the advice:
             `;
 
-            console.log(prompt);
+            let openai_key = localStorage.getItem('openai-api');
 
-            const url = base_url + prompt;
+            // if api key is not set
+            if(openai_key == null || openai_key == '' || openai_key == 'null'){
+                // prompt for api key
+                openai_key = prompt('Please enter your openAI api key');
+
+                if(openai_key == null || openai_key == '' || openai_key == 'null'){
+                    openai_key = null
+                    document.getElementById('advice').innerHTML = 'Didnt recieve api key. Please try again.';
+                    return;
+                } 
+                else {
+                    localStorage.setItem('openai-api', openai_key);
+                }
+            }
             
-            // the url returns plain text
-            fetch(url)
-            .then(response => response.text())
+            
+
+
+            const url = 'https://api.openai.com/v1/chat/completions';
+            const data = {
+            model: "gpt-3.5-turbo",
+            messages: [
+                    {
+                        role: "system",
+                        content: ai_prompt
+                    }
+                ]
+            }
+
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${openai_key}`
+                },
+                body: JSON.stringify(data)
+            }
+
+            fetch(url, options)
+            .then(response => response.json())
             .then(data => {
-                document.getElementById('advice').innerHTML = data;
+                console.log(data);
+                document.getElementById('advice').innerHTML = data.choices[0].message.content;
+                hasPrompt = true;
+            })
+            .catch(error => {
+                console.log(error);
+                document.getElementById('advice').innerHTML = 'Error getting response. Please try again later';
+                localStorage.setItem('openai-api', null)
+                return
             });
+
+        
         }
     
 
